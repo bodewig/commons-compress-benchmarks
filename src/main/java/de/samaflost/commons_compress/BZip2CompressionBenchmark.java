@@ -18,12 +18,11 @@ import org.openjdk.jmh.annotations.State;
 @State(Scope.Benchmark)
 public class BZip2CompressionBenchmark {
 
-    private final byte[] SMALL_FILE;
-    private final byte[] BIGGER_FILE;
+    private byte[] SMALL_FILE;
+    private byte[] BIGGER_FILE;
 
     @Setup
     public void readData() throws Exception {
-        System.err.println("init");
         try (InputStream in = BZip2CompressionBenchmark.class.getResourceAsStream("/bla.tar")) {
             SMALL_FILE = IOUtils.toByteArray(in);
         }
@@ -35,20 +34,21 @@ public class BZip2CompressionBenchmark {
     }
 
     @Benchmark
-    public void compressSmallFile() throws IOException {
-        compress(SMALL_FILE);
+    public byte[] compressSmallFile() throws IOException {
+        return compress(SMALL_FILE);
     }
 
     @Benchmark
-    public void compressBiggerFile() throws IOException {
-        compress(BIGGER_FILE);
+    public byte[] compressBiggerFile() throws IOException {
+        return compress(BIGGER_FILE);
     }
 
-    private void compress(byte[] data) throws IOException {
+    private byte[] compress(byte[] data) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              BZip2CompressorOutputStream bout = new BZip2CompressorOutputStream(baos);
              ByteArrayInputStream in = new ByteArrayInputStream(data)) {
             IOUtils.copy(in, bout);
+            return baos.toByteArray();
         }
     }
 
