@@ -6,24 +6,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
+import org.apache.commons.compress.compressors.CompressorOutputStream;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 
 @State(Scope.Benchmark)
-public class BZip2CompressionBenchmark {
+public class CompressionBenchmark {
 
     private byte[] SMALL_FILE;
     private byte[] BIGGER_FILE;
+    private final CompressorStreamFactory factory = new CompressorStreamFactory();
+
+    @Param({"lz4-framed"})
+    public String format;
 
     @Setup
     public void readData() throws Exception {
-        try (InputStream in = BZip2CompressionBenchmark.class.getResourceAsStream("/bla.tar")) {
+        try (InputStream in = CompressionBenchmark.class.getResourceAsStream("/bla.tar")) {
             SMALL_FILE = IOUtils.toByteArray(in);
         }
         try (InputStream fromUrl = new URL("http://archive.apache.org/dist/commons/compress/source/commons-compress-1.13-src.tar.gz")
@@ -34,22 +40,21 @@ public class BZip2CompressionBenchmark {
     }
 
     @Benchmark
-    public byte[] compressSmallFile() throws IOException {
+    public byte[] compressSmallFile() throws Exception {
         return compress(SMALL_FILE);
     }
 
     @Benchmark
-    public byte[] compressBiggerFile() throws IOException {
+    public byte[] compressBiggerFile() throws Exception {
         return compress(BIGGER_FILE);
     }
 
-    private byte[] compress(byte[] data) throws IOException {
+    private byte[] compress(byte[] data) throws Exception {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             BZip2CompressorOutputStream bout = new BZip2CompressorOutputStream(baos);
+             CompressorOutputStream bout = factory.createCompressorOutputStream(format, baos);
              ByteArrayInputStream in = new ByteArrayInputStream(data)) {
             IOUtils.copy(in, bout);
             return baos.toByteArray();
         }
     }
-
 }
