@@ -3,6 +3,7 @@ package de.samaflost.commons_compress;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.compress.utils.IOUtils;
@@ -14,7 +15,7 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 
 @State(Scope.Benchmark)
-public class CompressionBenchmark {
+public class DecompressionBenchmark {
 
     private byte[] SMALL_FILE;
     private byte[] BIGGER_FILE;
@@ -25,17 +26,17 @@ public class CompressionBenchmark {
 
     @Setup
     public void readData() throws Exception {
-        SMALL_FILE = TestFixture.SMALL_FILE;
-        BIGGER_FILE = TestFixture.BIGGER_FILE;
+        SMALL_FILE = compress(TestFixture.SMALL_FILE);
+        BIGGER_FILE = compress(TestFixture.BIGGER_FILE);
     }
 
     @Benchmark
-    public byte[] compressSmallFile() throws Exception {
+    public byte[] decompressSmallFile() throws Exception {
         return compress(SMALL_FILE);
     }
 
     @Benchmark
-    public byte[] compressBiggerFile() throws Exception {
+    public byte[] decompressBiggerFile() throws Exception {
         return compress(BIGGER_FILE);
     }
 
@@ -44,6 +45,15 @@ public class CompressionBenchmark {
              CompressorOutputStream bout = factory.createCompressorOutputStream(format, baos);
              ByteArrayInputStream in = new ByteArrayInputStream(data)) {
             IOUtils.copy(in, bout);
+            return baos.toByteArray();
+        }
+    }
+
+    private byte[] decompress(byte[] data) throws Exception {
+        try (ByteArrayInputStream in = new ByteArrayInputStream(data);
+             CompressorInputStream bin = factory.createCompressorInputStream(format, in);
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            IOUtils.copy(bin, baos);
             return baos.toByteArray();
         }
     }
