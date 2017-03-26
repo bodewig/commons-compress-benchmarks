@@ -6,8 +6,7 @@ import java.io.ByteArrayOutputStream;
 import de.samaflost.commons_compress.TestFixture;
 
 import org.apache.commons.compress.compressors.lz77support.Parameters;
-import org.apache.commons.compress.compressors.snappy.SnappyCompressorInputStream;
-import org.apache.commons.compress.compressors.snappy.SnappyCompressorOutputStream;
+import org.apache.commons.compress.compressors.lz4.BlockLZ4CompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 
 import org.openjdk.jmh.annotations.Benchmark;
@@ -17,7 +16,7 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 
 @State(Scope.Benchmark)
-public class RawSnappyCompressionBenchmark {
+public class BlockLZ4CompressionBenchmark {
 
     private byte[] SMALL_FILE;
     private byte[] BIGGER_FILE;
@@ -43,7 +42,7 @@ public class RawSnappyCompressionBenchmark {
 
     private byte[] compress(byte[] data) throws Exception {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             SnappyCompressorOutputStream bout = new SnappyCompressorOutputStream(baos, data.length, getParameters());
+             BlockLZ4CompressorOutputStream bout = new BlockLZ4CompressorOutputStream(baos, getParameters());
              ByteArrayInputStream in = new ByteArrayInputStream(data)) {
             IOUtils.copy(in, bout);
             return baos.toByteArray();
@@ -53,15 +52,12 @@ public class RawSnappyCompressionBenchmark {
     private Parameters getParameters() {
         switch (config) {
         case "speed":
-            return SnappyCompressorOutputStream.createParameterBuilder(SnappyCompressorInputStream.DEFAULT_BLOCK_SIZE)
-                .tunedForSpeed().build();
+            return BlockLZ4CompressorOutputStream.createParameterBuilder().tunedForSpeed().build();
         case "compression":
-            return SnappyCompressorOutputStream.createParameterBuilder(SnappyCompressorInputStream.DEFAULT_BLOCK_SIZE)
-                .tunedForCompressionRatio().build();
+            return BlockLZ4CompressorOutputStream.createParameterBuilder().tunedForCompressionRatio().build();
         case "default":
         default:
-            return SnappyCompressorOutputStream.createParameterBuilder(SnappyCompressorInputStream.DEFAULT_BLOCK_SIZE)
-            .build();
+            return BlockLZ4CompressorOutputStream.createParameterBuilder().build();
         }
     }
 }
