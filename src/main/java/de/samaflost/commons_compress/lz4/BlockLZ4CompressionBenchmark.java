@@ -1,4 +1,4 @@
-package de.samaflost.commons_compress.snappy;
+package de.samaflost.commons_compress.lz4;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
