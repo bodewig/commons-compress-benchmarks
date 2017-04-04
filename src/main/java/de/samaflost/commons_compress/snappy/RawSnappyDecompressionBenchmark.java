@@ -41,6 +41,7 @@ public class RawSnappyDecompressionBenchmark {
              SnappyCompressorOutputStream bout = new SnappyCompressorOutputStream(baos, data.length);
              ByteArrayInputStream in = new ByteArrayInputStream(data)) {
             IOUtils.copy(in, bout);
+            bout.close();
             return baos.toByteArray();
         }
     }

@@ -45,6 +45,7 @@ public class DecompressionBenchmark {
              CompressorOutputStream bout = factory.createCompressorOutputStream(format, baos);
              ByteArrayInputStream in = new ByteArrayInputStream(data)) {
             IOUtils.copy(in, bout);
+            bout.close();
             return baos.toByteArray();
         }
     }

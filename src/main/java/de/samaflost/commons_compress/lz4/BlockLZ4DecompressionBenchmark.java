@@ -41,6 +41,7 @@ public class BlockLZ4DecompressionBenchmark {
              BlockLZ4CompressorOutputStream bout = new BlockLZ4CompressorOutputStream(baos);
              ByteArrayInputStream in = new ByteArrayInputStream(data)) {
             IOUtils.copy(in, bout);
+            bout.close();
             return baos.toByteArray();
         }
     }
