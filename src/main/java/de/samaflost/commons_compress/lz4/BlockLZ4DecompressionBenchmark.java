@@ -28,12 +28,12 @@ public class BlockLZ4DecompressionBenchmark {
 
     @Benchmark
     public byte[] decompressSmallFile() throws Exception {
-        return decompress(compress(SMALL_FILE));
+        return decompress(SMALL_FILE);
     }
 
     @Benchmark
     public byte[] decompressBiggerFile() throws Exception {
-        return decompress(compress(BIGGER_FILE));
+        return decompress(BIGGER_FILE);
     }
 
     private byte[] compress(byte[] data) throws Exception {

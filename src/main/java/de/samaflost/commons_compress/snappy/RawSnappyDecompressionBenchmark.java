@@ -28,12 +28,12 @@ public class RawSnappyDecompressionBenchmark {
 
     @Benchmark
     public byte[] decompressSmallFile() throws Exception {
-        return compress(SMALL_FILE);
+        return decompress(SMALL_FILE);
     }
 
     @Benchmark
     public byte[] decompressBiggerFile() throws Exception {
-        return compress(BIGGER_FILE);
+        return decompress(BIGGER_FILE);
     }
 
     private byte[] compress(byte[] data) throws Exception {
