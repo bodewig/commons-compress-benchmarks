@@ -7,7 +7,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>JMH benchmarks for (Stefan's) experiments with Commons Compress</name>
+    <name>JMH benchmarks for (Stefan's) experiments with Apache Commons Compress</name>
 
     <prerequisites>
         <maven>3.0</maven>
