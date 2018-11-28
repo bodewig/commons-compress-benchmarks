@@ -41,8 +41,9 @@ public class DecompressionBenchmark {
     }
 
     private byte[] compress(byte[] data) throws Exception {
+        final String f = "deflate64".equals(format) ? "deflate" : format;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             CompressorOutputStream bout = factory.createCompressorOutputStream(format, baos);
+             CompressorOutputStream bout = factory.createCompressorOutputStream(f, baos);
              ByteArrayInputStream in = new ByteArrayInputStream(data)) {
             IOUtils.copy(in, bout);
             bout.close();
