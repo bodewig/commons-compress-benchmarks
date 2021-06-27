@@ -49,6 +49,11 @@ public class ArchivingBenchmark {
     }
 
     @Benchmark
+    public byte[] archiveSomeSmallFiles() throws Exception {
+        return archive(SMALL_FILE, format, 100);
+    }
+
+    @Benchmark
     public byte[] archiveBiggerFile() throws Exception {
         return archive(BIGGER_FILE);
     }

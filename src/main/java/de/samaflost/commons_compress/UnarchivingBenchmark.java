@@ -20,6 +20,7 @@ import org.openjdk.jmh.annotations.State;
 public class UnarchivingBenchmark {
 
     private byte[] SMALL_FILE;
+    private byte[] SOME_SMALL_FILES;
     private byte[] MANY_SMALL_FILES;
     private byte[] BIGGER_FILE;
     private static final ArchiveStreamFactory factory = new ArchiveStreamFactory();
@@ -31,6 +32,7 @@ public class UnarchivingBenchmark {
     public void readData() throws Exception {
         SMALL_FILE = ArchivingBenchmark.archive(TestFixture.SMALL_FILE, format, 1);
         BIGGER_FILE = ArchivingBenchmark.archive(TestFixture.BIGGER_FILE, format, 1);
+        SOME_SMALL_FILES = ArchivingBenchmark.archive(TestFixture.SMALL_FILE, format, 100);
         MANY_SMALL_FILES = ArchivingBenchmark.archive(TestFixture.SMALL_FILE, format, 10000);
     }
 
@@ -45,6 +47,11 @@ public class UnarchivingBenchmark {
     }
 
     @Benchmark
+    public byte[] unarchiveSomeSmallFiles() throws Exception {
+        return unarchive(SOME_SMALL_FILES);
+    }
+
+    @Benchmark
     public byte[] archiveBiggerFile() throws Exception {
         return unarchive(BIGGER_FILE);
     }
@@ -52,6 +59,11 @@ public class UnarchivingBenchmark {
     @Benchmark
     public byte[] unarchiveManySmallFilesMetaDataOnly() throws Exception {
         return unarchiveMetadataOnly(MANY_SMALL_FILES);
+    }
+
+    @Benchmark
+    public byte[] unarchiveSomeSmallFilesMetaDataOnly() throws Exception {
+        return unarchiveMetadataOnly(SOME_SMALL_FILES);
     }
 
     private byte[] unarchive(byte[] data) throws Exception {
@@ -66,36 +78,30 @@ public class UnarchivingBenchmark {
     private byte[] unarchiveStream(byte[] data) throws Exception {
         try (ByteArrayInputStream in = new ByteArrayInputStream(data);
              ArchiveInputStream ain = factory.createArchiveInputStream(format, in);
-             ) {
-            byte[] lastEntryData = null;
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
             while (ain.getNextEntry() != null) {
-                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    IOUtils.copy(ain, out);
-                    out.close();
-                    lastEntryData = out.toByteArray();
-                }
+                IOUtils.copy(ain, out);
+                out.close();
             }
-            return lastEntryData;
+            out.close();
+            return out.toByteArray();
         }
     }
 
     private byte[] unarchive7z(byte[] data) throws Exception {
         try (SeekableInMemoryByteChannel ch = new SeekableInMemoryByteChannel(data);
              SevenZFile ain = new SevenZFile(ch);
-             ) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             final byte[] buffer = new byte[8192];
-            byte[] lastEntryData = null;
             while (ain.getNextEntry() != null) {
-                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    int n = 0;
-                    while (-1 != (n = ain.read(buffer))) {
-                        out.write(buffer, 0, n);
-                    }
-                    out.close();
-                    lastEntryData = out.toByteArray();
+                int n = 0;
+                while (-1 != (n = ain.read(buffer))) {
+                    out.write(buffer, 0, n);
                 }
             }
-            return lastEntryData;
+            out.close();
+            return out.toByteArray();
         }
     }
 
@@ -112,9 +118,11 @@ public class UnarchivingBenchmark {
         try (ByteArrayInputStream in = new ByteArrayInputStream(data);
              ArchiveInputStream ain = factory.createArchiveInputStream(format, in);
              ) {
+            int cnt = 0;
             while (ain.getNextEntry() != null) {
+                cnt++;
             }
-            return new byte[0];
+            return new byte[cnt];
         }
     }
 
@@ -122,9 +130,11 @@ public class UnarchivingBenchmark {
         try (SeekableInMemoryByteChannel ch = new SeekableInMemoryByteChannel(data);
              SevenZFile ain = new SevenZFile(ch);
              ) {
+            int cnt = 0;
             while (ain.getNextEntry() != null) {
+                cnt++;
             }
-            return new byte[0];
+            return new byte[cnt];
         }
     }
 }
