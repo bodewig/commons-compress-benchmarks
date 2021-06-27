@@ -52,7 +52,7 @@ public class UnarchivingBenchmark {
     }
 
     @Benchmark
-    public byte[] archiveBiggerFile() throws Exception {
+    public byte[] unarchiveBiggerFile() throws Exception {
         return unarchive(BIGGER_FILE);
     }
 
