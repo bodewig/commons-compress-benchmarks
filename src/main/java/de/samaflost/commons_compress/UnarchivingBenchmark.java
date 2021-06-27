@@ -49,6 +49,11 @@ public class UnarchivingBenchmark {
         return unarchive(BIGGER_FILE);
     }
 
+    @Benchmark
+    public byte[] unarchiveManySmallFilesMetaDataOnly() throws Exception {
+        return unarchiveMetadataOnly(MANY_SMALL_FILES);
+    }
+
     private byte[] unarchive(byte[] data) throws Exception {
         switch(format) {
         case ArchiveStreamFactory.SEVEN_Z:
@@ -91,6 +96,35 @@ public class UnarchivingBenchmark {
                 }
             }
             return lastEntryData;
+        }
+    }
+
+    private byte[] unarchiveMetadataOnly(byte[] data) throws Exception {
+        switch(format) {
+        case ArchiveStreamFactory.SEVEN_Z:
+            return unarchive7zMetadataOnly(data);
+        default:
+            return unarchiveStreamMetadataOnly(data);
+        }
+    }
+
+    private byte[] unarchiveStreamMetadataOnly(byte[] data) throws Exception {
+        try (ByteArrayInputStream in = new ByteArrayInputStream(data);
+             ArchiveInputStream ain = factory.createArchiveInputStream(format, in);
+             ) {
+            while (ain.getNextEntry() != null) {
+            }
+            return new byte[0];
+        }
+    }
+
+    private byte[] unarchive7zMetadataOnly(byte[] data) throws Exception {
+        try (SeekableInMemoryByteChannel ch = new SeekableInMemoryByteChannel(data);
+             SevenZFile ain = new SevenZFile(ch);
+             ) {
+            while (ain.getNextEntry() != null) {
+            }
+            return new byte[0];
         }
     }
 }
